@@ -128,3 +128,29 @@ Future deployment will include:
 * Container registry
 * AWS ECS deployment
 * Automated infrastructure provisioning
+
+## API Contract
+
+### GET /health
+
+Returns service health status.
+
+Response:
+{"status": "ok"}
+
+---
+
+### POST /analyze
+
+Analyzes a log message and returns possible root cause.
+
+Request:
+{
+"log": "database timeout"
+}
+
+Response:
+{
+"root_cause": "Service timeout",
+"suggestion": "Check network connectivity or service availability"
+}
