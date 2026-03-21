@@ -1,3 +1,4 @@
+from db_check import test_db_connection
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 
@@ -13,7 +14,16 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok"}
+    db_status = "ok"
+    try:
+        test_db_connection()
+    except Exception:
+        db_status = "error"
+
+    return {
+        "status": "ok",
+        "database": db_status
+    }
 
 @app.post("/analyze")
 def analyze_log(data: dict):

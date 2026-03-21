@@ -7,3 +7,20 @@ services:
       dockerfile: docker/Dockerfile
     ports:
       - "8000:8000"
+    depends_on:
+      - postgres
+    environment:
+      DB_HOST: postgres
+      DB_NAME: logdb
+      DB_USER: loguser
+      DB_PASSWORD: logpass
+
+  postgres:
+    image: postgres:15
+    container_name: log-analyzer-postgres
+    environment:
+      POSTGRES_DB: logdb
+      POSTGRES_USER: loguser
+      POSTGRES_PASSWORD: logpass
+    ports:
+      - "5432:5432"
