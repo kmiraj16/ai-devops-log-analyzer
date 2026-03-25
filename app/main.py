@@ -1,4 +1,5 @@
 from db_check import test_db_connection
+from db_check import insert_analysis
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 
@@ -30,19 +31,28 @@ def analyze_log(data: dict):
     log = data.get("log", "").lower()
 
     if "timeout" in log:
+        root_cause = "Service timeout"
+        suggestion = "Check network connectivity or service availability"
+        insert_analysis(log, root_cause, suggestion)
         return {
-            "root_cause": "Service timeout",
-            "suggestion": "Check network connectivity or service availability"
+            "root_cause": root_cause,
+            "suggestion": suggestion
         }
 
     elif "database" in log:
+        root_cause = "Database connection issue"
+        suggestion = "Check DB health and credentials"
+        insert_analysis(log, root_cause, suggestion)
         return {
-            "root_cause": "Database connection issue",
-            "suggestion": "Check DB health and credentials"
+            "root_cause": root_cause,
+            "suggestion": suggestion
         }
 
     else:
+        root_cause = "Unknown"
+        suggestion = "Further investigation required"
+        insert_analysis(log, root_cause, suggestion)
         return {
-            "root_cause": "Unknown",
-            "suggestion": "Further investigation required"
+            "root_cause": root_cause,
+            "suggestion": suggestion
         }
