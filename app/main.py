@@ -1,5 +1,4 @@
-from db_check import test_db_connection
-from db_check import insert_analysis
+from db_check import test_db_connection, insert_analysis, get_analysis_by_id
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 
@@ -56,3 +55,12 @@ def analyze_log(data: dict):
             "root_cause": root_cause,
             "suggestion": suggestion
         }
+    
+@app.get("/results/{analysis_id}")
+def get_result(analysis_id: int):
+    result = get_analysis_by_id(analysis_id)
+
+    if result:
+        return result
+
+    return {"error": "Result not found"}
