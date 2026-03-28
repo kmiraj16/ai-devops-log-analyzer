@@ -84,6 +84,23 @@ Response:
 }
 
 ---
+## Data Persistence
+
+The application stores analysis results in PostgreSQL.
+
+### Workflow
+
+1. User submits log via UI or API
+2. FastAPI analyzes the log
+3. Result is stored in PostgreSQL
+4. Data can be retrieved using:
+
+GET /results/{id}
+
+### Example
+
+GET /results/1
+
 
 ## Local Development Setup
 
