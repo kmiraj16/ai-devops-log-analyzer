@@ -24,6 +24,52 @@ This diagram represents the target AWS architecture for the AI DevOps Log Analyz
 
 ---
 
+## AWS Deployment Proof
+
+### Application Running (via ALB)
+
+![Health Check](docs/screenshots/local/app-health.png)
+
+### API Documentation (FastAPI Swagger)
+
+![Swagger](docs/screenshots/local/app-docs.png)
+
+---
+
+### ECS Service Running
+
+![ECS](docs/screenshots/aws/ecs-service.png)
+
+### ECS Task (Private Subnet)
+
+![Task](docs/screenshots/aws/ecs-task.png)
+
+---
+
+### Load Balancer + Target Health
+
+![ALB](docs/screenshots/aws/alb-overview.png)
+
+![Target Group](docs/screenshots/aws/target-group.png)
+
+---
+
+### Database (RDS - Private)
+
+![RDS](docs/screenshots/db/rds-db.png)
+
+---
+
+### Network Architecture (Subnets)
+
+![Subnets](docs/screenshots/aws/subnets.png)
+
+### Security Groups
+
+![SG](docs/screenshots/aws/security-groups.png)
+
+---
+
 ## Architecture Overview
 
 * Traffic enters through an **Application Load Balancer** in public subnets.
