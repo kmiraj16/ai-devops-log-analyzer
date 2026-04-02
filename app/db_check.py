@@ -1,29 +1,26 @@
 import os
 import psycopg2
 
+def get_connection():
+    return psycopg2.connect(
+        host=os.getenv("DB_HOST", "localhost"),
+        port=int(os.getenv("DB_PORT", "5432")),
+        dbname=os.getenv("DB_NAME", "logdb"),
+        user=os.getenv("DB_USER", "loguser"),
+        password=os.getenv("DB_PASSWORD", "logpass")
+    )
+
 def test_db_connection():
     try:
-        conn = psycopg2.connect(
-            host=os.getenv("DB_HOST", "localhost"),
-            dbname=os.getenv("DB_NAME", "logdb"),
-            user=os.getenv("DB_USER", "loguser"),
-            password=os.getenv("DB_PASSWORD", "logpass")
-        )
+        conn = get_connection()
         conn.close()
         return True
     except Exception as e:
         print("DB connection failed:", e)
         return False
 
-
 def insert_analysis(log_text, root_cause, suggestion):
-    conn = psycopg2.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        dbname=os.getenv("DB_NAME", "logdb"),
-        user=os.getenv("DB_USER", "loguser"),
-        password=os.getenv("DB_PASSWORD", "logpass")
-    )
-
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -39,13 +36,7 @@ def insert_analysis(log_text, root_cause, suggestion):
     conn.close()
 
 def get_analysis_by_id(analysis_id):
-    conn = psycopg2.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        dbname=os.getenv("DB_NAME", "logdb"),
-        user=os.getenv("DB_USER", "loguser"),
-        password=os.getenv("DB_PASSWORD", "logpass")
-    )
-
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute(
