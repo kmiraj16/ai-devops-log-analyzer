@@ -64,3 +64,4 @@ def get_result(analysis_id: int):
         return result
 
     return {"error": "Result not found"}
+
