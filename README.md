@@ -24,7 +24,7 @@ This diagram represents the target AWS architecture for the AI DevOps Log Analyz
 
 ---
 
-## AWS Deployment Proof
+## 🚀 AWS Deployment Proof
 
 ### Application Running (via ALB)
 
@@ -36,6 +36,20 @@ This diagram represents the target AWS architecture for the AI DevOps Log Analyz
 
 ---
 
+## 🔥 End-to-End Data Flow (RDS-Backed)
+
+### Analyze Endpoint (Write to Database)
+
+![Analyze Success](docs/screenshots/local/analyze-success.png)
+
+### Results Endpoint (Read from Database)
+
+![Results Success](docs/screenshots/local/results-success.png)
+
+---
+
+## ECS & Load Balancing
+
 ### ECS Service Running
 
 ![ECS](docs/screenshots/aws/ecs-service.png)
@@ -44,40 +58,48 @@ This diagram represents the target AWS architecture for the AI DevOps Log Analyz
 
 ![Task](docs/screenshots/aws/ecs-task.png)
 
----
-
-### Load Balancer + Target Health
+### Application Load Balancer
 
 ![ALB](docs/screenshots/aws/alb-overview.png)
+
+### Target Group Health
 
 ![Target Group](docs/screenshots/aws/target-group.png)
 
 ---
 
-### Database (RDS - Private)
+## Database (RDS - Private)
+
+### RDS Instance
 
 ![RDS](docs/screenshots/db/rds-db.png)
 
+### Schema Verification
+
+![Schema](docs/screenshots/db/schema-proof.png)
+
 ---
 
-### Network Architecture (Subnets)
+## Network Architecture
+
+### Subnets
 
 ![Subnets](docs/screenshots/aws/subnets.png)
 
 ### Security Groups
 
-![SG](docs/screenshots/aws/security-groups.png)
+![Security Groups](docs/screenshots/aws/security-groups.png)
 
 ---
 
 ## Architecture Overview
 
-* Traffic enters through an **Application Load Balancer** in public subnets.
-* The application runs on **ECS Fargate** in private subnets.
-* Data is stored in **Amazon RDS PostgreSQL** in private database subnets.
-* The service integrates with an **external AI API** for log analysis.
-* **CloudWatch** is used for logging, monitoring, and alerts.
-* **GitHub Actions + Amazon ECR** enable CI/CD and container deployment.
+* Traffic enters through an **Application Load Balancer** in public subnets
+* The application runs on **ECS Fargate** in private subnets
+* Data is stored in **Amazon RDS PostgreSQL** in private database subnets
+* The service integrates with an **external AI API** for log analysis
+* **CloudWatch** is used for logging, monitoring, and alerts
+* **GitHub Actions + Amazon ECR** enable CI/CD and container deployment
 
 ---
 
@@ -113,8 +135,6 @@ This diagram represents the target AWS architecture for the AI DevOps Log Analyz
 
 Returns service health status.
 
-Response:
-
 ```json
 {"status": "ok"}
 ```
@@ -123,9 +143,7 @@ Response:
 
 ### POST /analyze
 
-Analyzes a log message and returns possible root cause.
-
-Request:
+Analyzes a log message and stores the result in PostgreSQL.
 
 ```json
 {
@@ -133,138 +151,72 @@ Request:
 }
 ```
 
-Response:
+---
 
-```json
-{
-  "root_cause": "Service timeout",
-  "suggestion": "Check network connectivity or service availability"
-}
-```
+### GET /results/{id}
+
+Retrieves stored analysis result from PostgreSQL.
 
 ---
 
 ## Data Persistence
 
-The application stores analysis results in PostgreSQL.
+The application stores analysis results in **Amazon RDS PostgreSQL**.
 
 ### Workflow
 
-1. User submits log via UI or API
+1. Client sends log via API
 2. FastAPI processes and analyzes the log
-3. Result is stored in PostgreSQL
-4. Data can be retrieved via API
+3. Result is stored in RDS
+4. Data is retrieved via `/results/{id}`
 
-### Example
+### Verification
 
-```
-GET /results/1
-```
+* POST `/analyze` successfully inserts records into RDS
+* GET `/results/{id}` retrieves stored records
+* `public.analyses` table confirmed via schema check
 
 ---
 
 ## Local Development Setup
 
-### 1. Create Virtual Environment
-
 ```bash
 python3 -m venv .venv
-```
-
-### 2. Activate Virtual Environment
-
-Mac / Linux:
-
-```bash
 source .venv/bin/activate
-```
-
-Windows:
-
-```bash
-.venv\Scripts\activate
-```
-
-### 3. Install Dependencies
-
-```bash
 pip install -r app/requirements.txt
-```
-
-### 4. Run the Application
-
-```bash
 uvicorn app.main:app --reload
 ```
 
-### 5. Test the API
+Access:
 
 * http://127.0.0.1:8000/docs
 * http://127.0.0.1:8000/health
 
 ---
 
-## Current Progress
-
-* Backend API implemented using FastAPI
-* Health check endpoint created
-* Log analysis endpoint implemented
-* PostgreSQL integration completed
-* Local development environment configured
-
----
-
-## Roadmap
-
-### Phase A (Current Focus)
-
-* Backend service development
-* Docker containerization
-* Local database integration
-
-### Upcoming Phases
-
-* AWS infrastructure setup (VPC, subnets, ECS, RDS)
-* Terraform infrastructure automation
-* CI/CD pipeline using GitHub Actions
-* CloudWatch monitoring and alerting
-* Production-ready deployment
-
----
-
-## Deployment Plan
-
-### Local Development
-
-Run the API locally:
-
-```bash
-uvicorn app.main:app --reload
-```
-
-Access API docs:
-
-* http://127.0.0.1:8000/docs
-
----
-
-### Cloud Deployment (Planned)
-
-* Docker image build and push to Amazon ECR
-* ECS Fargate deployment behind Application Load Balancer
-* PostgreSQL hosted on Amazon RDS
-* Infrastructure provisioning using Terraform
-* CI/CD pipeline using GitHub Actions
-* Monitoring using CloudWatch
-
----
-
 ## Project Goal
 
-This project is designed to demonstrate real-world cloud engineering and DevOps practices, including:
+This project demonstrates real-world cloud engineering and DevOps practices:
 
 * Designing scalable AWS architectures
-* Containerizing and deploying applications
-* Automating infrastructure with Terraform
-* Implementing CI/CD pipelines
-* Building observable and reliable systems
+* Deploying containerized applications on ECS
+* Implementing persistent storage using RDS
+* Debugging real cloud networking and connectivity issues
+* Building production-style backend systems
+
+---
+
+## Key Learnings
+
+* ECS ↔ RDS connectivity requires correct VPC + security group configuration
+* Container image updates require task definition revisions
+* Schema initialization is required for fresh databases
+* End-to-end testing is critical to validate real system behavior
+
+---
+
+## Next Steps
+
+* Terraform infrastructure automation
+* CI/CD pipeline with GitHub Actions
+* CloudWatch monitoring and alerting
