@@ -1,0 +1,13 @@
+# Local terraform directory
+.terraform/
+
+# State files (these contain secrets, don't push them!)
+*.tfstate
+*.tfstate.*
+
+# Variables files that might have secrets
+*.tfvars
+!terraform.tfvars  # Only keep this if it has NO secrets (like the one we discussed)
+
+# Crash logs
+crash.log
