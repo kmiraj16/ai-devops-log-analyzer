@@ -189,3 +189,4 @@ resource "aws_security_group" "rds" {
     Name = "${var.project_name}-rds-sg"
   }
 }
+
