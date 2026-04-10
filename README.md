@@ -92,6 +92,54 @@ This diagram represents the target AWS architecture for the AI DevOps Log Analyz
 
 ---
 
+## 🏗️ Terraform Infrastructure (Week 8)
+
+The AWS networking layer is provisioned using Terraform to ensure reproducibility and infrastructure as code practices.
+
+### Resources Created
+
+* VPC (`10.0.0.0/16`)
+* Public subnets (2)
+* Private application subnets (2)
+* Private database subnets (2)
+* Internet Gateway
+* Public route table
+* Security groups for ALB, ECS, and RDS
+
+### Structure
+
+```
+terraform/
+├── main.tf
+├── variables.tf
+├── outputs.tf
+├── provider.tf
+├── terraform.tfvars
+```
+
+### Commands Used
+
+```bash
+terraform init
+terraform validate
+terraform plan
+terraform apply
+```
+
+### Outcome
+
+* Successfully provisioned AWS networking using Terraform
+* Infrastructure is reproducible and version-controlled
+* Ready for ECS, ALB, and RDS provisioning via Terraform (next phase)
+
+### Screenshots
+
+* `docs/screenshots/terraform/terraform-apply-success.png`
+* `docs/screenshots/terraform/terraform-vpc-subnets.png`
+* `docs/screenshots/terraform/terraform-security-groups.png`
+
+---
+
 ## Architecture Overview
 
 * Traffic enters through an **Application Load Balancer** in public subnets
@@ -212,11 +260,12 @@ This project demonstrates real-world cloud engineering and DevOps practices:
 * Container image updates require task definition revisions
 * Schema initialization is required for fresh databases
 * End-to-end testing is critical to validate real system behavior
+* Infrastructure can be fully reproduced using Terraform
 
 ---
 
 ## Next Steps
 
-* Terraform infrastructure automation
+* Terraform ECS + ALB + RDS (Week 9)
 * CI/CD pipeline with GitHub Actions
 * CloudWatch monitoring and alerting
