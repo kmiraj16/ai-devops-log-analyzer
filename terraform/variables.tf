@@ -45,3 +45,14 @@ variable "private_db_subnet_b_cidr" {
   type    = string
   default = "10.0.22.0/24"
 }
+
+variable "container_port" {
+  description = "Container port for the app"
+  type        = number
+  default     = 8000
+}
+
+variable "ecr_image_url" {
+  description = "Full ECR image URL with tag"
+  type        = string
+}
