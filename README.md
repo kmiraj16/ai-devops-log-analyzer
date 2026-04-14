@@ -140,6 +140,58 @@ terraform apply
 
 ---
 
+---
+
+## 🚀 Terraform Deployment Proof (Week 9)
+
+### Terraform Apply Success
+
+![Terraform Apply](docs/screenshots/terraform/terraform-apply-week9.png)
+
+---
+
+### ECS Service (Running via Terraform)
+
+![ECS Terraform](docs/screenshots/terraform/terraform-ecs-service.png)
+
+---
+
+### Load Balancer Health Check
+
+![ALB Health](docs/screenshots/terraform/terraform-alb-health.png)
+
+---
+
+### Target Group (Healthy)
+
+![Target Group Terraform](docs/screenshots/terraform/terraform-target-group.png)
+
+---
+
+### RDS Instance (Provisioned via Terraform)
+
+![RDS Terraform](docs/screenshots/terraform/terraform-rds-instance.png)
+
+---
+
+### Database Initialization Task (One-Time)
+
+![DB Init Task](docs/screenshots/terraform/terraform-db-init-task.png)
+
+---
+
+### End-to-End Flow (Terraform Stack)
+
+#### Analyze Endpoint (Write)
+
+![Analyze Terraform](docs/screenshots/terraform/terraform-analyze-success.png)
+
+#### Results Endpoint (Read)
+
+![Results Terraform](docs/screenshots/terraform/terraform-results-success.png)
+
+---
+
 ## Architecture Overview
 
 * Traffic enters through an **Application Load Balancer** in public subnets
