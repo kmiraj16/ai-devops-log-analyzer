@@ -56,3 +56,27 @@ variable "ecr_image_url" {
   description = "Full ECR image URL with tag"
   type        = string
 }
+
+variable "db_name" {
+  description = "PostgreSQL database name"
+  type        = string
+  default     = "logdb"
+}
+
+variable "db_username" {
+  description = "PostgreSQL username"
+  type        = string
+  default     = "loguser"
+}
+
+variable "db_password" {
+  description = "PostgreSQL password"
+  type        = string
+  sensitive   = true
+}
+
+variable "db_port" {
+  description = "PostgreSQL port"
+  type        = number
+  default     = 5432
+}

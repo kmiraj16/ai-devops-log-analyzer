@@ -317,6 +317,40 @@ resource "aws_cloudwatch_log_group" "ecs" {
   retention_in_days = 7
 }
 
+resource "aws_db_subnet_group" "main" {
+  name = "${var.project_name}-db-subnet-group"
+  subnet_ids = [
+    aws_subnet.private_db_a.id,
+    aws_subnet.private_db_b.id
+  ]
+
+  tags = {
+    Name = "${var.project_name}-db-subnet-group"
+  }
+}
+
+resource "aws_db_instance" "main" {
+  identifier             = "${var.project_name}-db"
+  engine                 = "postgres"
+  engine_version         = "17.4"
+  instance_class         = "db.t3.micro"
+  allocated_storage      = 20
+  storage_type           = "gp2"
+  db_name                = var.db_name
+  username               = var.db_username
+  password               = var.db_password
+  port                   = var.db_port
+  publicly_accessible    = false
+  skip_final_snapshot    = true
+  deletion_protection    = false
+  db_subnet_group_name   = aws_db_subnet_group.main.name
+  vpc_security_group_ids = [aws_security_group.rds.id]
+
+  tags = {
+    Name = "${var.project_name}-db"
+  }
+}
+
 resource "aws_ecs_task_definition" "app" {
   family                   = "${var.project_name}-task"
   network_mode             = "awsvpc"
@@ -336,6 +370,29 @@ resource "aws_ecs_task_definition" "app" {
           containerPort = var.container_port
           hostPort      = var.container_port
           protocol      = "tcp"
+        }
+      ]
+
+      environment = [
+        {
+          name  = "DB_HOST"
+          value = aws_db_instance.main.address
+        },
+        {
+          name  = "DB_PORT"
+          value = tostring(var.db_port)
+        },
+        {
+          name  = "DB_NAME"
+          value = var.db_name
+        },
+        {
+          name  = "DB_USER"
+          value = var.db_username
+        },
+        {
+          name  = "DB_PASSWORD"
+          value = var.db_password
         }
       ]
 
@@ -374,4 +431,55 @@ resource "aws_ecs_service" "app" {
   }
 
   depends_on = [aws_lb_listener.http]
+}
+
+resource "aws_ecs_task_definition" "db_init" {
+  family                   = "${var.project_name}-db-init"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "256"
+  memory                   = "512"
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name      = "db-init"
+      image     = var.ecr_image_url
+      essential = true
+
+      command = ["python", "init_db.py"]
+
+      environment = [
+        {
+          name  = "DB_HOST"
+          value = aws_db_instance.main.address
+        },
+        {
+          name  = "DB_PORT"
+          value = tostring(var.db_port)
+        },
+        {
+          name  = "DB_NAME"
+          value = var.db_name
+        },
+        {
+          name  = "DB_USER"
+          value = var.db_username
+        },
+        {
+          name  = "DB_PASSWORD"
+          value = var.db_password
+        }
+      ]
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.ecs.name
+          awslogs-region        = var.aws_region
+          awslogs-stream-prefix = "ecs"
+        }
+      }
+    }
+  ])
 }
