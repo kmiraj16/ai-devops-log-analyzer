@@ -1,71 +1,52 @@
+# --- VPC & Networking Outputs ---
+
 output "vpc_id" {
-  value = aws_vpc.main.id
+  description = "The ID of the VPC"
+  value       = aws_vpc.main.id
 }
 
 output "public_subnet_ids" {
-  value = [
-    aws_subnet.public_a.id,
-    aws_subnet.public_b.id
-  ]
-}
-
-output "private_app_subnet_ids" {
-  value = [
-    aws_subnet.private_app_a.id,
-    aws_subnet.private_app_b.id
-  ]
-}
-
-output "private_db_subnet_ids" {
-  value = [
-    aws_subnet.private_db_a.id,
-    aws_subnet.private_db_b.id
-  ]
-}
-
-output "alb_security_group_id" {
-  value = aws_security_group.alb.id
-}
-
-output "ecs_security_group_id" {
-  value = aws_security_group.ecs.id
-}
-
-output "rds_security_group_id" {
-  value = aws_security_group.rds.id
+  description = "List of IDs of public subnets"
+  value       = [aws_subnet.public_a.id, aws_subnet.public_b.id]
 }
 
 output "alb_dns_name" {
-  value = aws_lb.main.dns_name
+  description = "The DNS name of the load balancer to access the app"
+  value       = aws_lb.main.dns_name
 }
 
+# --- ECS Outputs (Critical for GitHub Actions) ---
+
 output "ecs_cluster_name" {
-  value = aws_ecs_cluster.main.name
+  description = "The name of the ECS Cluster"
+  value       = aws_ecs_cluster.main.name
 }
 
 output "ecs_service_name" {
-  value = aws_ecs_service.app.name
-}
-
-output "rds_endpoint" {
-  value = aws_db_instance.main.address
-}
-
-output "rds_db_name" {
-  value = aws_db_instance.main.db_name
-}
-
-output "ecs_cluster_name" {
-  value = aws_ecs_cluster.main.name
-}
-
-output "ecs_service_name" {
-  value = aws_ecs_service.main.name
+  description = "The name of the ECS Service"
+  value       = aws_ecs_service.app.name
 }
 
 output "aws_region" {
-  value = var.aws_region
+  description = "The AWS region configured in variables"
+  value       = var.aws_region
 }
-output "ecr_repository_url" {
-  value = aws_ecr_repository.app_repo.repository_url
+
+# --- Database Outputs ---
+
+output "rds_endpoint" {
+  description = "The connection endpoint for the RDS instance"
+  value       = aws_db_instance.main.address
+}
+
+output "rds_db_name" {
+  description = "The name of the database"
+  value       = aws_db_instance.main.db_name
+}
+
+# --- Security Group Outputs (For debugging) ---
+
+output "ecs_security_group_id" {
+  description = "The ID of the ECS Security Group"
+  value       = aws_security_group.ecs.id
 }
