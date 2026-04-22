@@ -1,33 +1,49 @@
 name: Deploy to ECS
 
-# Trigger this pipeline on every push to the 'main' branch
+# Triggers the workflow on push to the main branch
 on:
   push:
     branches:
       - main
 
+# OIDC permissions are required for the AWS credentials action
+permissions:
+  id-token: write 
+  contents: read  
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # 1. Pull your code from GitHub into the runner
+      # Step 1: Clone the repository to the runner
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Authenticate with AWS using your stored Secrets
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1 # The initial region for AWS CLI configuration
+      # Step 2: Use Terraform outputs to set environment variables dynamically
+      # This prevents hardcoding infra names (e.g., cluster name, region) in the YAML
+      - name: Get Terraform Outputs
+        id: tf-outputs
+        run: |
+          cd terraform # Path to your terraform files
+          terraform init
+          # Terraform output -raw extracts the value without quotes
+          echo "AWS_REGION=$(terraform output -raw aws_region)" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=$(terraform output -raw ecs_cluster_name)" >> $GITHUB_ENV
+          echo "SERVICE_NAME=$(terraform output -raw ecs_service_name)" >> $GITHUB_ENV
 
-      # 3. Log into your ECR repository
+      # Step 3: Configure AWS using OIDC (no need for static access keys)
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::287084411936:role/github-actions-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Step 4: Authenticate Docker with Amazon ECR
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
 
-      # 4. Build Docker image and push to ECR
+      # Step 5: Build, tag, and push the image to ECR
       - name: Build, tag, and push image
         id: build-image
         env:
@@ -35,24 +51,16 @@ jobs:
           ECR_REPOSITORY: ai-log-analyzer
           IMAGE_TAG: latest
         run: |
+          # Build from the docker/ directory
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f docker/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      # 5. Get Cluster, Service, and Region names dynamically from Terraform
-      - name: Get Terraform Outputs
-        id: tf-outputs
-        run: |
-          cd terraform # Ensure you are in the directory where your .tf files are
-          terraform init
-          echo "cluster_name=$(terraform output -raw ecs_cluster_name)" >> $GITHUB_ENV
-          echo "service_name=$(terraform output -raw ecs_service_name)" >> $GITHUB_ENV
-          echo "aws_region=$(terraform output -raw aws_region)" >> $GITHUB_ENV
-
-      # 6. Force ECS to pull the latest image and restart tasks using dynamic variables
+      # Step 6: Trigger a rolling update in ECS
+      # 'force-new-deployment' ensures ECS pulls the newest image if the task definition hasn't changed
       - name: Force new ECS deployment
         run: |
           aws ecs update-service \
-            --cluster ${{ env.cluster_name }} \
-            --service ${{ env.service_name }} \
-            --region ${{ env.aws_region }} \
+            --cluster ${{ env.CLUSTER_NAME }} \
+            --service ${{ env.SERVICE_NAME }} \
+            --region ${{ env.AWS_REGION }} \
             --force-new-deployment
