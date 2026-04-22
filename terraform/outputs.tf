@@ -54,3 +54,11 @@ output "rds_endpoint" {
 output "rds_db_name" {
   value = aws_db_instance.main.db_name
 }
+
+output "ecs_cluster_name" {
+  value = aws_ecs_cluster.main.name
+}
+
+output "ecs_service_name" {
+  value = aws_ecs_service.main.name
+}
