@@ -1,0 +1,58 @@
+name: Deploy to ECS
+
+# Trigger this pipeline on every push to the 'main' branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Pull your code from GitHub into the runner
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Authenticate with AWS using your stored Secrets
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1 # The initial region for AWS CLI configuration
+
+      # 3. Log into your ECR repository
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # 4. Build Docker image and push to ECR
+      - name: Build, tag, and push image
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ai-log-analyzer
+          IMAGE_TAG: latest
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f docker/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      # 5. Get Cluster, Service, and Region names dynamically from Terraform
+      - name: Get Terraform Outputs
+        id: tf-outputs
+        run: |
+          cd terraform # Ensure you are in the directory where your .tf files are
+          terraform init
+          echo "cluster_name=$(terraform output -raw ecs_cluster_name)" >> $GITHUB_ENV
+          echo "service_name=$(terraform output -raw ecs_service_name)" >> $GITHUB_ENV
+          echo "aws_region=$(terraform output -raw aws_region)" >> $GITHUB_ENV
+
+      # 6. Force ECS to pull the latest image and restart tasks using dynamic variables
+      - name: Force new ECS deployment
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.cluster_name }} \
+            --service ${{ env.service_name }} \
+            --region ${{ env.aws_region }} \
+            --force-new-deployment

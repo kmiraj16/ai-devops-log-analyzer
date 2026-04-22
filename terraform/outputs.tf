@@ -62,3 +62,10 @@ output "ecs_cluster_name" {
 output "ecs_service_name" {
   value = aws_ecs_service.main.name
 }
+
+output "aws_region" {
+  value = var.aws_region
+}
+output "ecr_repository_url" {
+  value = aws_ecr_repository.app_repo.repository_url
+}
