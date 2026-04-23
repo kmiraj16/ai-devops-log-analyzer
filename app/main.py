@@ -1,8 +1,25 @@
+from contextlib import asynccontextmanager
 from db_check import test_db_connection, insert_analysis, get_analysis_by_id
+from init_db import run_schema  # Importing your schema initialization script
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 
-app = FastAPI()
+# Enterprise Standard: Define the startup sequence
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("⚙️ Application Booting: Triggering Schema Initialization...")
+    try:
+        run_schema()
+        print("✅ Startup complete: Ready to accept traffic.")
+    except Exception as e:
+        print(f"🚨 CRITICAL: Database failed to initialize. Error: {e}")
+    
+    yield  # The application starts listening for requests here
+    
+    print("🛑 Application Shutting Down...")
+
+# Attach the lifespan sequence to the app initialization
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -64,4 +81,3 @@ def get_result(analysis_id: int):
         return result
 
     return {"error": "Result not found"}
-
