@@ -51,12 +51,6 @@ variable "container_port" {
   type        = number
   default     = 8000
 }
-
-variable "ecr_image_url" {
-  description = "Full ECR image URL with tag"
-  type        = string
-}
-
 variable "db_name" {
   description = "PostgreSQL database name"
   type        = string
