@@ -335,9 +335,9 @@ resource "aws_ecs_task_definition" "app" {
 
   container_definitions = jsonencode([
     {
-      name      = "ai-log-analyzer"
+      name = "ai-log-analyzer"
       # This tells Terraform: "Go look at the ECR repo you just created and get its URL, then add ':latest'"
-      image = "${aws_ecr_repository.app_repo.repository_url}:latest"
+      image     = "${aws_ecr_repository.app_repo.repository_url}:latest"
       essential = true
 
       portMappings = [
