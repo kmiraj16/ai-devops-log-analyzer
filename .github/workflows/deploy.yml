@@ -1,62 +1,51 @@
 name: Deploy to ECS
 
-# Triggers the workflow on push to the main branch
 on:
   push:
     branches:
       - main
 
-# OIDC permissions are required for the AWS credentials action
 permissions:
   id-token: write 
   contents: read  
+
+# Define the variables here so the pipeline has them instantly
+env:
+  AWS_REGION: us-east-1
+  CLUSTER_NAME: ai-log-analyzer-cluster
+  SERVICE_NAME: ai-log-analyzer-service
+  ECR_REPOSITORY: ai-log-analyzer
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Clone the repository to the runner
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Use Terraform outputs to set environment variables dynamically
-      # This prevents hardcoding infra names (e.g., cluster name, region) in the YAML
-      - name: Get Terraform Outputs
-        id: tf-outputs
-        run: |
-          cd terraform # Path to your terraform files
-          terraform init
-          # Terraform output -raw extracts the value without quotes
-          echo "AWS_REGION=$(terraform output -raw aws_region)" >> $GITHUB_ENV
-          echo "CLUSTER_NAME=$(terraform output -raw ecs_cluster_name)" >> $GITHUB_ENV
-          echo "SERVICE_NAME=$(terraform output -raw ecs_service_name)" >> $GITHUB_ENV
-
-      # Step 3: Configure AWS using OIDC (no need for static access keys)
+      # Step 1: Securely authenticate using OIDC
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::287084411936:role/github-actions-role
           aws-region: ${{ env.AWS_REGION }}
 
-      # Step 4: Authenticate Docker with Amazon ECR
+      # Step 2: Login to ECR
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Step 5: Build, tag, and push the image to ECR
+      # Step 3: Build and push the image using the env variables
       - name: Build, tag, and push image
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ai-log-analyzer
           IMAGE_TAG: latest
         run: |
-          # Build from the docker/ directory
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f docker/Dockerfile .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG -f docker/Dockerfile .
+          docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
 
-      # Step 6: Trigger a rolling update in ECS
-      # 'force-new-deployment' ensures ECS pulls the newest image if the task definition hasn't changed
+      # Step 4: Tell ECS to grab the new image
       - name: Force new ECS deployment
         run: |
           aws ecs update-service \
