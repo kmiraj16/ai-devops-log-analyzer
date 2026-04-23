@@ -336,7 +336,8 @@ resource "aws_ecs_task_definition" "app" {
   container_definitions = jsonencode([
     {
       name      = "ai-log-analyzer"
-      image     = var.ecr_image_url
+      # This tells Terraform: "Go look at the ECR repo you just created and get its URL, then add ':latest'"
+      image = "${aws_ecr_repository.app_repo.repository_url}:latest"
       essential = true
 
       portMappings = [
@@ -405,6 +406,14 @@ resource "aws_ecs_service" "app" {
   }
 
   depends_on = [aws_lb_listener.http]
+
+  # ADD THIS BLOCK HERE
+  lifecycle {
+    ignore_changes = [
+      task_definition,
+      desired_count
+    ]
+  }
 }
 
 resource "aws_ecs_task_definition" "db_init" {
@@ -419,7 +428,7 @@ resource "aws_ecs_task_definition" "db_init" {
   container_definitions = jsonencode([
     {
       name      = "db-init"
-      image     = var.ecr_image_url
+      image     = "${aws_ecr_repository.app_repo.repository_url}:latest"
       essential = true
 
       command = ["python", "init_db.py"]
