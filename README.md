@@ -6,11 +6,11 @@
 [![Docker](https://img.shields.io/badge/Docker-Container-2496ED?logo=docker)](https://www.docker.com/)
 [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI/CD-2088FF?logo=github-actions)](https://github.com/features/actions)
 
-An enterprise-grade observability platform designed to reduce **Mean Time to Detection (MTTD)**. This system ingests distributed logs, utilizes an **AI-driven root cause engine** for analysis, and automates schema orchestration within a hardened AWS environment.
+An enterprise-grade observability platform designed to reduce **Mean Time to Detection (MTTD)**. This system ingests distributed logs, utilizes a specialized **AI-driven root cause engine**, and automates multi-tier infrastructure orchestration.
 
 ---
 
-## 🏗️ System Architecture & Engineering Blueprint
+## 🏗️ System Architecture (2026 Blueprint)
 
 ```mermaid
 flowchart TB
@@ -32,9 +32,9 @@ flowchart TB
             ALB["fa:fa-network-wired Application Load Balancer"]
         end
 
-        subgraph PRIVATE ["&nbsp; 🔐 PRIVATE COMPUTE & DATA TIER &nbsp;"]
+        subgraph PRIVATE ["&nbsp; 🔐 PRIVATE APP & DATA TIER &nbsp;"]
             direction TB
-            ECS["fa:fa-server ECS Fargate Service"]
+            ECS["fa:fa-server ECS Fargate Cluster"]
             RDS[("fa:fa-database RDS PostgreSQL")]
             AI_Engine{{"fa:fa-brain AI Analyzer Engine"}}
             
@@ -74,15 +74,12 @@ flowchart TB
 ## ⚙️ Core Engineering Capabilities
 
 ### 🛡️ Zero-Trust CI/CD & Security
-* **OIDC Identity Federation:** Eliminated the use of long-lived AWS IAM Access Keys. GitHub Actions authenticates via **OpenID Connect (OIDC)** short-lived tokens, adhering to the principle of least privilege.
-* **Multi-Tier Network Isolation:** Engineered a hardened VPC with **Public (DMZ)** and **Private** tiers. The Application (ECS) and Database (RDS) reside in non-routable subnets, protected by cross-linked Security Groups.
+* **OIDC Identity Federation:** GitHub Actions authenticates via **OpenID Connect (OIDC)** short-lived tokens, eliminating long-lived IAM keys.
+* **Multi-Tier Network Isolation:** Hardened VPC with **DMZ** (ALB) and **Private** (ECS/RDS) subnets, isolated via security-group chain-linking.
 
 ### 🤖 AI-Powered Reliability
-* **Automated Root Cause Analysis:** Log streams are processed by an AI engine to categorize severity and provide immediate remediation runbooks, significantly reducing **Mean Time to Repair (MTTR)**.
-* **Idempotent Schema Orchestration:** The FastAPI application manages its own PostgreSQL lifecycle. Upon container instantiation, it executes schema migrations (`IF NOT EXISTS`), enabling "Cattle, not Pets" infrastructure.
-
-### 🛠️ Immutable Infrastructure (IaC)
-* **Stateful Governance:** 100% of the AWS environment is codified via **Terraform**. Infrastructure state is maintained in a remote backend with atomic locking to prevent configuration drift.
+* **Automated Root Cause Analysis:** Log streams are processed by an AI engine to provide immediate remediation runbooks, reducing **MTTR**.
+* **Idempotent Schema Orchestration:** The app manages its own RDS schema lifecycle migrations during container boot-up.
 
 ---
 
@@ -91,26 +88,26 @@ flowchart TB
 <details>
 <summary><b>1. CI/CD & Security Integrity</b></summary>
 <br>
-<i>Proof of the passwordless OIDC handshake and successful pipeline execution.</i>
+<i>Validation of ECS Cluster status and successful service deployment.</i>
 <br><br>
-<img src="docs/screenshots/workflows-success.png" alt="CI/CD Success" width="800">
+<img src="screenshots/aws/ecs-service.png" alt="ECS Service Status" width="800">
 </details>
 
 <details>
 <summary><b>2. Cloud Infrastructure Provisioning</b></summary>
 <br>
-<i>Terraform output validating the creation of the VPC, ALB, and ECS Fargate clusters.</i>
+<i>Terraform output confirming the 100% codified AWS environment.</i>
 <br><br>
-<img src="docs/screenshots/terraform/terraform-apply-week9.png" alt="Terraform Apply" width="800">
+<img src="screenshots/terraform/terraform-apply-week9.png" alt="Terraform Success" width="800">
 </details>
 
 <details>
-<summary><b>3. AI Endpoint & Database Connectivity</b></summary>
+<summary><b>3. Application & Database Connectivity</b></summary>
 <br>
-<i>Live API responses showing successful deep health checks and log analysis storage.</i>
+<i>API health checks and internal RDS schema verification proof.</i>
 <br><br>
-<img src="docs/screenshots/local/app-health.png" alt="Health Check" width="800">
-<img src="docs/screenshots/db/schema-proof.png" alt="Database Schema" width="800">
+<img src="screenshots/local/app-health.png" alt="API Health" width="400">
+<img src="screenshots/db/rds-db.png" alt="Database Schema" width="400">
 </details>
 
 ---
@@ -118,5 +115,5 @@ flowchart TB
 ## 📖 SRE Runbook (Extract)
 **Scenario: Database Connection Failure**
 1. Check **CloudWatch Alarm** `RDSConnectionThreshold`.
-2. Verify ECS Task environment variables for `DB_HOST` via the GitHub Actions log.
-3. Validate Security Group ingress rules (ensure Port 5432 is open between App-Tier and Data-Tier).
+2. Verify Security Group ingress rules (ensure Port 5432 is open between App and Data tiers).
+3. Refer to [Full Runbook](docs/RUNBOOK.md) for rollback steps.
