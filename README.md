@@ -1,323 +1,122 @@
-# AI DevOps Log Analyzer
+# AI DevOps Log Analyzer 🚀
 
-## Project Overview
+[![AWS](https://img.shields.io/badge/AWS-Cloud-FF9900?logo=amazonaws)](https://aws.amazon.com/)
+[![Terraform](https://img.shields.io/badge/Terraform-IaC-7B42BC?logo=terraform)](https://www.terraform.io/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Docker](https://img.shields.io/badge/Docker-Container-2496ED?logo=docker)](https://www.docker.com/)
+[![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI/CD-2088FF?logo=github-actions)](https://github.com/features/actions)
 
-AI DevOps Log Analyzer is a cloud-native backend service designed to analyze infrastructure and application logs and suggest possible root causes.
-
-The goal of this project is to build a production-style system that helps engineers quickly identify operational issues in distributed environments.
-
-This project evolves step-by-step through a real-world engineering roadmap:
-
-* Local backend service
-* Containerized application (Docker)
-* Cloud deployment on AWS (ECS Fargate)
-* Infrastructure as Code using Terraform
-* Monitoring and observability using CloudWatch
+An enterprise-grade observability platform designed to reduce **Mean Time to Detection (MTTD)**. This system ingests distributed logs, utilizes an **AI-driven root cause engine** for analysis, and automates schema orchestration within a hardened AWS environment.
 
 ---
 
-## Architecture Diagram
-
-This diagram represents the target AWS architecture for the AI DevOps Log Analyzer system.
-
-![Architecture](diagrams/architecture.png)
-
----
-
-## 🚀 AWS Deployment Proof
-
-### Application Running (via ALB)
-
-![Health Check](docs/screenshots/local/app-health.png)
-
-### API Documentation (FastAPI Swagger)
-
-![Swagger](docs/screenshots/local/app-docs.png)
-
----
-
-## 🔥 End-to-End Data Flow (RDS-Backed)
-
-### Analyze Endpoint (Write to Database)
-
-![Analyze Success](docs/screenshots/local/analyze-success.png)
-
-### Results Endpoint (Read from Database)
-
-![Results Success](docs/screenshots/local/results-success.png)
-
----
-
-## ECS & Load Balancing
-
-### ECS Service Running
-
-![ECS](docs/screenshots/aws/ecs-service.png)
-
-### ECS Task (Private Subnet)
-
-![Task](docs/screenshots/aws/ecs-task.png)
-
-### Application Load Balancer
-
-![ALB](docs/screenshots/aws/alb-overview.png)
-
-### Target Group Health
-
-![Target Group](docs/screenshots/aws/target-group.png)
-
----
-
-## Database (RDS - Private)
-
-### RDS Instance
-
-![RDS](docs/screenshots/db/rds-db.png)
-
-### Schema Verification
-
-![Schema](docs/screenshots/db/schema-proof.png)
-
----
-
-## Network Architecture
-
-### Subnets
-
-![Subnets](docs/screenshots/aws/subnets.png)
-
-### Security Groups
-
-![Security Groups](docs/screenshots/aws/security-groups.png)
-
----
-
-## 🏗️ Terraform Infrastructure (Week 8)
-
-The AWS networking layer is provisioned using Terraform to ensure reproducibility and infrastructure as code practices.
-
-### Resources Created
-
-* VPC (`10.0.0.0/16`)
-* Public subnets (2)
-* Private application subnets (2)
-* Private database subnets (2)
-* Internet Gateway
-* Public route table
-* Security groups for ALB, ECS, and RDS
-
-### Structure
-
-```
-terraform/
-├── main.tf
-├── variables.tf
-├── outputs.tf
-├── provider.tf
-├── terraform.tfvars
-```
-
-### Commands Used
-
-```bash
-terraform init
-terraform validate
-terraform plan
-terraform apply
-```
-
-### Outcome
-
-* Successfully provisioned AWS networking using Terraform
-* Infrastructure is reproducible and version-controlled
-* Ready for ECS, ALB, and RDS provisioning via Terraform (next phase)
-
-### Screenshots
-
-* `docs/screenshots/terraform/terraform-apply-success.png`
-* `docs/screenshots/terraform/terraform-vpc-subnets.png`
-* `docs/screenshots/terraform/terraform-security-groups.png`
-
----
-
----
-
-## 🚀 Terraform Deployment Proof (Week 9)
-
-### Terraform Apply Success
-
-![Terraform Apply](docs/screenshots/terraform/terraform-apply-week9.png)
-
----
-
-### ECS Service (Running via Terraform)
-
-![ECS Terraform](docs/screenshots/terraform/terraform-ecs-service.png)
-
----
-
-### Load Balancer Health Check
-
-![ALB Health](docs/screenshots/terraform/terraform-alb-health.png)
-
----
-
-### Target Group (Healthy)
-
-![Target Group Terraform](docs/screenshots/terraform/terraform-target-group.png)
-
----
-
-### RDS Instance (Provisioned via Terraform)
-
-![RDS Terraform](docs/screenshots/terraform/terraform-rds-instance.png)
-
----
-
-### Database Initialization Task (One-Time)
-
-![DB Init Task](docs/screenshots/terraform/terraform-db-init-task.png)
-
----
-
-### End-to-End Flow (Terraform Stack)
-
-#### Analyze Endpoint (Write)
-
-![Analyze Terraform](docs/screenshots/terraform/terraform-analyze-success.png)
-
-#### Results Endpoint (Read)
-
-![Results Terraform](docs/screenshots/terraform/terraform-results-success.png)
-
----
-
-## Architecture Overview
-
-* Traffic enters through an **Application Load Balancer** in public subnets
-* The application runs on **ECS Fargate** in private subnets
-* Data is stored in **Amazon RDS PostgreSQL** in private database subnets
-* The service integrates with an **external AI API** for log analysis
-* **CloudWatch** is used for logging, monitoring, and alerts
-* **GitHub Actions + Amazon ECR** enable CI/CD and container deployment
-
----
-
-## Tech Stack
-
-### Backend
-
-* Python
-* FastAPI
-
-### DevOps / Infrastructure
-
-* Docker (containerization)
-* AWS ECS Fargate (container orchestration)
-* Amazon RDS PostgreSQL (data persistence)
-* Application Load Balancer (traffic routing)
-* CloudWatch (logging and monitoring)
-* Terraform (infrastructure as code)
-* GitHub Actions (CI/CD pipeline)
-* Amazon ECR (container registry)
-
-### Tools
-
-* Git
-* GitHub
-* Linux CLI
-
----
-
-## API Contract
-
-### GET /health
-
-Returns service health status.
-
-```json
-{"status": "ok"}
+## 🏗️ System Architecture & Engineering Blueprint
+
+```mermaid
+flowchart TB
+    %% Top Tier: Control & Security
+    User["fa:fa-user-gear API Consumer / SRE"]
+
+    subgraph CONTROL ["&nbsp; ⚙️ AUTOMATION & SECURITY CONTROL PLANE &nbsp;"]
+        direction LR
+        Git["fa:fa-github Source"] --> Workflows[["fa:fa-gears GitHub Actions"]]
+        Workflows --> OIDC["fa:fa-shield-halved IAM OIDC"]
+        Workflows --> TF{{"fa:fa-cloud Terraform Cloud"}}
+    end
+
+    %% Middle Tier: AWS Infrastructure
+    subgraph AWS ["&nbsp; ☁️ AWS PRODUCTION VPC (REGION: US-EAST-1) &nbsp;"]
+        direction TB
+        
+        subgraph PUBLIC ["&nbsp; 🌐 PUBLIC TIER (DMZ) &nbsp;"]
+            ALB["fa:fa-network-wired Application Load Balancer"]
+        end
+
+        subgraph PRIVATE ["&nbsp; 🔐 PRIVATE COMPUTE & DATA TIER &nbsp;"]
+            direction TB
+            ECS["fa:fa-server ECS Fargate Service"]
+            RDS[("fa:fa-database RDS PostgreSQL")]
+            AI_Engine{{"fa:fa-brain AI Analyzer Engine"}}
+            
+            ECS <--> AI_Engine
+            ECS -->|Idempotent Boot| RDS
+        end
+    end
+
+    %% Side Tier: Telemetry
+    subgraph TELEMETRY ["&nbsp; 📊 OBSERVABILITY STACK &nbsp;"]
+        CW["fa:fa-eye CloudWatch Logs"]
+        Alarms{{"fa:fa-bell Health Alarms"}}
+        CW --- Alarms
+    end
+
+    %% Connectivity logic
+    User -->|HTTPS/TLS 1.3| ALB
+    ALB -->|Target Group Routing| ECS
+    TF -.->|Infrastructure as Code| AWS
+    ECS -.->|FluentBit Telemetry| CW
+    Alarms -.->|SNS / PagerDuty| User
+
+    %% Style Definitions
+    classDef blue fill:#ffffff,stroke:#2088FF,stroke-width:2px,color:#1D2126,font-weight:bold;
+    classDef orange fill:#ffffff,stroke:#FF9900,stroke-width:2px,color:#232F3E,font-weight:bold;
+    classDef teal fill:#ffffff,stroke:#00A191,stroke-width:2px,color:#333,font-weight:bold;
+    classDef gray fill:#f8f9fa,stroke:#9ea5ad,stroke-width:1px,stroke-dasharray: 5 5;
+    
+    class CONTROL,Workflows,Git,TF blue;
+    class AWS,ALB,ECS,RDS,OIDC orange;
+    class TELEMETRY,CW,AI_Engine,Alarms teal;
+    class PUBLIC,PRIVATE gray;
 ```
 
 ---
 
-### POST /analyze
+## ⚙️ Core Engineering Capabilities
 
-Analyzes a log message and stores the result in PostgreSQL.
+### 🛡️ Zero-Trust CI/CD & Security
+* **OIDC Identity Federation:** Eliminated the use of long-lived AWS IAM Access Keys. GitHub Actions authenticates via **OpenID Connect (OIDC)** short-lived tokens, adhering to the principle of least privilege.
+* **Multi-Tier Network Isolation:** Engineered a hardened VPC with **Public (DMZ)** and **Private** tiers. The Application (ECS) and Database (RDS) reside in non-routable subnets, protected by cross-linked Security Groups.
 
-```json
-{
-  "log": "database timeout"
-}
-```
+### 🤖 AI-Powered Reliability
+* **Automated Root Cause Analysis:** Log streams are processed by an AI engine to categorize severity and provide immediate remediation runbooks, significantly reducing **Mean Time to Repair (MTTR)**.
+* **Idempotent Schema Orchestration:** The FastAPI application manages its own PostgreSQL lifecycle. Upon container instantiation, it executes schema migrations (`IF NOT EXISTS`), enabling "Cattle, not Pets" infrastructure.
 
----
-
-### GET /results/{id}
-
-Retrieves stored analysis result from PostgreSQL.
+### 🛠️ Immutable Infrastructure (IaC)
+* **Stateful Governance:** 100% of the AWS environment is codified via **Terraform**. Infrastructure state is maintained in a remote backend with atomic locking to prevent configuration drift.
 
 ---
 
-## Data Persistence
+## 📡 Operational Proof (SRE Artifacts)
 
-The application stores analysis results in **Amazon RDS PostgreSQL**.
+<details>
+<summary><b>1. CI/CD & Security Integrity</b></summary>
+<br>
+<i>Proof of the passwordless OIDC handshake and successful pipeline execution.</i>
+<br><br>
+<img src="docs/screenshots/workflows-success.png" alt="CI/CD Success" width="800">
+</details>
 
-### Workflow
+<details>
+<summary><b>2. Cloud Infrastructure Provisioning</b></summary>
+<br>
+<i>Terraform output validating the creation of the VPC, ALB, and ECS Fargate clusters.</i>
+<br><br>
+<img src="docs/screenshots/terraform/terraform-apply-week9.png" alt="Terraform Apply" width="800">
+</details>
 
-1. Client sends log via API
-2. FastAPI processes and analyzes the log
-3. Result is stored in RDS
-4. Data is retrieved via `/results/{id}`
-
-### Verification
-
-* POST `/analyze` successfully inserts records into RDS
-* GET `/results/{id}` retrieves stored records
-* `public.analyses` table confirmed via schema check
-
----
-
-## Local Development Setup
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r app/requirements.txt
-uvicorn app.main:app --reload
-```
-
-Access:
-
-* http://127.0.0.1:8000/docs
-* http://127.0.0.1:8000/health
+<details>
+<summary><b>3. AI Endpoint & Database Connectivity</b></summary>
+<br>
+<i>Live API responses showing successful deep health checks and log analysis storage.</i>
+<br><br>
+<img src="docs/screenshots/local/app-health.png" alt="Health Check" width="800">
+<img src="docs/screenshots/db/schema-proof.png" alt="Database Schema" width="800">
+</details>
 
 ---
 
-## Project Goal
-
-This project demonstrates real-world cloud engineering and DevOps practices:
-
-* Designing scalable AWS architectures
-* Deploying containerized applications on ECS
-* Implementing persistent storage using RDS
-* Debugging real cloud networking and connectivity issues
-* Building production-style backend systems
-
----
-
-## Key Learnings
-
-* ECS ↔ RDS connectivity requires correct VPC + security group configuration
-* Container image updates require task definition revisions
-* Schema initialization is required for fresh databases
-* End-to-end testing is critical to validate real system behavior
-* Infrastructure can be fully reproduced using Terraform
-
----
-
-## Next Steps
-
-* Terraform ECS + ALB + RDS (Week 9)
-* CI/CD pipeline with GitHub Actions
-* CloudWatch monitoring and alerting
+## 📖 SRE Runbook (Extract)
+**Scenario: Database Connection Failure**
+1. Check **CloudWatch Alarm** `RDSConnectionThreshold`.
+2. Verify ECS Task environment variables for `DB_HOST` via the GitHub Actions log.
+3. Validate Security Group ingress rules (ensure Port 5432 is open between App-Tier and Data-Tier).
