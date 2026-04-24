@@ -6,11 +6,11 @@
 [![Docker](https://img.shields.io/badge/Docker-Container-2496ED?logo=docker)](https://www.docker.com/)
 [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI/CD-2088FF?logo=github-actions)](https://github.com/features/actions)
 
-An enterprise-grade observability platform designed to reduce **Mean Time to Detection (MTTD)**. This system ingests distributed logs, utilizes a specialized **AI-driven root cause engine**, and automates multi-tier infrastructure orchestration.
+An enterprise-grade observability platform designed to reduce **Mean Time to Detection (MTTD)**. This system ingests distributed logs, utilizes a specialized **AI-driven root cause engine**, and automates multi-tier infrastructure orchestration via a hardened CI/CD pipeline.
 
 ---
 
-## 🏗️ System Architecture (2026 Blueprint)
+## 🏗️ Enterprise Cloud-Native Architecture
 
 ```mermaid
 flowchart TB
@@ -43,7 +43,6 @@ flowchart TB
         end
     end
 
-    %% Side Tier: Telemetry
     subgraph TELEMETRY ["&nbsp; 📊 OBSERVABILITY STACK &nbsp;"]
         CW["fa:fa-eye CloudWatch Logs"]
         Alarms{{"fa:fa-bell Health Alarms"}}
@@ -74,40 +73,47 @@ flowchart TB
 ## ⚙️ Core Engineering Capabilities
 
 ### 🛡️ Zero-Trust CI/CD & Security
-* **OIDC Identity Federation:** GitHub Actions authenticates via **OpenID Connect (OIDC)** short-lived tokens, eliminating long-lived IAM keys.
-* **Multi-Tier Network Isolation:** Hardened VPC with **DMZ** (ALB) and **Private** (ECS/RDS) subnets, isolated via security-group chain-linking.
+* **OIDC Identity Federation:** Eliminated the use of long-lived AWS IAM Access Keys. GitHub Actions authenticates via **OpenID Connect (OIDC)** short-lived tokens.
+* **Multi-Tier Network Isolation:** Engineered a hardened VPC with **Public (DMZ)** and **Private** tiers. Compute (ECS) and Database (RDS) reside in non-routable subnets.
 
 ### 🤖 AI-Powered Reliability
-* **Automated Root Cause Analysis:** Log streams are processed by an AI engine to provide immediate remediation runbooks, reducing **MTTR**.
-* **Idempotent Schema Orchestration:** The app manages its own RDS schema lifecycle migrations during container boot-up.
+* **Automated Root Cause Analysis:** Log streams are processed by an AI engine to provide immediate remediation runbooks, significantly reducing **MTTR**.
+* **Idempotent Schema Orchestration:** The app manages its own RDS schema lifecycle migrations during container instantiation.
 
 ---
 
-## 📡 Operational Proof (SRE Artifacts)
+## 📡 Operational Proof & Validation
 
 <details>
-<summary><b>1. CI/CD & Security Integrity</b></summary>
+<summary><b>1. Automated Pipeline Execution (CI/CD)</b></summary>
 <br>
-<i>Validation of ECS Cluster status and successful service deployment.</i>
+<b>Artifact:</b> <code>screenshots/local/workflows.png</code>
+<br>
+<b>Technical Significance:</b> Validates the full CI/CD lifecycle (Linting -> Docker Build -> ECR Push -> ECS Deployment). This proves the project is not manually deployed but managed through 100% automated workflows.
 <br><br>
+<img src="screenshots/local/workflows.png" alt="GitHub Actions Workflow Success" width="800">
+</details>
+
+<details>
+<summary><b>2. Multi-Tier Infrastructure State (AWS)</b></summary>
+<br>
+<b>Artifacts:</b> <code>screenshots/aws/ecs-service.png</code> & <code>screenshots/terraform/terraform-apply-week9.png</code>
+<br>
+<b>Technical Significance:</b> Confirms that the Terraform-codified infrastructure (VPC, ALB, Fargate) is successfully provisioned and in a <code>HEALTHY</code> state within the AWS console.
+<br><br>
+<img src="screenshots/terraform/terraform-apply-week9.png" alt="Terraform Success" width="800">
 <img src="screenshots/aws/ecs-service.png" alt="ECS Service Status" width="800">
 </details>
 
 <details>
-<summary><b>2. Cloud Infrastructure Provisioning</b></summary>
+<summary><b>3. Integration & Data Persistence Proof</b></summary>
 <br>
-<i>Terraform output confirming the 100% codified AWS environment.</i>
-<br><br>
-<img src="screenshots/terraform/terraform-apply-week9.png" alt="Terraform Success" width="800">
-</details>
-
-<details>
-<summary><b>3. Application & Database Connectivity</b></summary>
+<b>Artifacts:</b> <code>screenshots/local/app-health.png</code> & <code>screenshots/db/rds-db.png</code>
 <br>
-<i>API health checks and internal RDS schema verification proof.</i>
+<b>Technical Significance:</b> Proves the successful integration of the 3-tier architecture. The health check confirms the API can reach the private RDS instance, and the DB schema validation proves idempotent bootstrapping was successful.
 <br><br>
-<img src="screenshots/local/app-health.png" alt="API Health" width="400">
-<img src="screenshots/db/rds-db.png" alt="Database Schema" width="400">
+<img src="screenshots/local/app-health.png" alt="API Health Check" width="800">
+<img src="screenshots/db/rds-db.png" alt="RDS Database Schema" width="800">
 </details>
 
 ---
@@ -115,5 +121,5 @@ flowchart TB
 ## 📖 SRE Runbook (Extract)
 **Scenario: Database Connection Failure**
 1. Check **CloudWatch Alarm** `RDSConnectionThreshold`.
-2. Verify Security Group ingress rules (ensure Port 5432 is open between App and Data tiers).
+2. Verify Security Group ingress rules (ensure Port 5432 is open).
 3. Refer to [Full Runbook](docs/RUNBOOK.md) for rollback steps.
