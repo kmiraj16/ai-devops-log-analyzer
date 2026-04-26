@@ -74,3 +74,8 @@ variable "db_port" {
   type        = number
   default     = 5432
 }
+
+variable "alert_email" {
+  description = "The email address that will receive CloudWatch SNS alerts."
+  type        = string
+}
