@@ -80,6 +80,12 @@ flowchart TB
 * **Automated Root Cause Analysis:** Log streams are processed by an AI engine to provide immediate remediation runbooks, significantly reducing **MTTR**.
 * **Idempotent Schema Orchestration:** The app manages its own RDS schema lifecycle migrations during container instantiation.
 
+### 📊 Observability & Monitoring
+* **Centralized Logging:** Integrated CloudWatch Log Insights for real-time FastAPI application log analysis.
+* **Infrastructure Dashboards:** Custom CloudWatch Dashboards monitoring ECS Fargate CPU/Memory saturation and ALB latency percentiles.
+* **Proactive Alerting:** Automated SNS email alerts triggered by CloudWatch Alarms for 5XX backend failures and database connection thresholds.
+* **Operational Readiness:** Comprehensive SRE Runbook detailing smoke tests, rollback procedures, and chaos testing validation.
+
 ---
 
 ## 📡 Operational Proof & Validation
@@ -116,10 +122,35 @@ flowchart TB
 <img src="screenshots/db/rds-db.png" alt="RDS Database Schema" width="800">
 </details>
 
+<details>
+<summary><b>4. Full-Stack Observability & Incident Response</b></summary>
+<br>
+<b>Artifacts:</b> <code>screenshots/aws/final-cloudwatch-vitals-dashboard.png</code> & <code>screenshots/aws/sns-chaos-test-alert.png</code>
+<br>
+<b>Technical Significance:</b> Demonstrates a production-ready CloudWatch dashboard monitoring ECS compute, ALB traffic, and application logs in a single pane of glass. Also proves automated incident response via SNS alerting during a simulated chaos engineering test.
+<br><br>
+<img src="screenshots/aws/final-cloudwatch-vitals-dashboard.png" alt="CloudWatch Vitals Dashboard" width="800">
+<br><br>
+<img src="screenshots/aws/sns-chaos-test-alert.png" alt="SNS Chaos Test Alert" width="800">
+</details>
+
 ---
 
-## 📖 SRE Runbook (Extract)
-**Scenario: Database Connection Failure**
+## 📖 Documentation & Operations
+
+* **[Operational Runbook (SOPs, Rollbacks, and Alerts)](docs/runbook.md)**: Contains the comprehensive guide for maintaining system reliability, including chaos testing validation and disaster recovery.
+
+**Quick Extract - Scenario: Database Connection Failure**
 1. Check **CloudWatch Alarm** `RDSConnectionThreshold`.
 2. Verify Security Group ingress rules (ensure Port 5432 is open).
-3. Refer to [Full Runbook](docs/RUNBOOK.md) for rollback steps.
+3. Refer to the full runbook for emergency rollback steps.
+
+---
+
+## 🧹 Infrastructure Teardown
+To prevent ongoing AWS charges, destroy the infrastructure when not in use:
+```bash
+cd terraform
+terraform destroy -auto-approve
+```
+*Note: Ensure you have backed up any necessary RDS snapshots before executing the destroy command.*
